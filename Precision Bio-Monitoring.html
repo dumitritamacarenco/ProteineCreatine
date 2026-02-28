@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precision Health: Protein & Creatine Monitoring Research Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F0F4F8; color: #1e293b; }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 350px; 
+            max-height: 400px; 
+        }
+        .section-header { border-left: 5px solid #008080; padding-left: 1rem; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); padding: 1.5rem; margin-bottom: 2rem; }
+        .btn-primary { background-color: #008080; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s; }
+        .btn-primary:hover { background-color: #006666; }
+        /* Timeline styling */
+        .timeline-item { border-left: 2px solid #e2e8f0; position: relative; padding-left: 1.5rem; padding-bottom: 2rem; }
+        .timeline-dot { position: absolute; left: -0.4rem; top: 0.25rem; width: 0.8rem; height: 0.8rem; border-radius: 50%; background-color: #008080; }
+    </style>
+    <!-- 
+    Palette Selection: "Clinical Precision" 
+    Primary: #008080 (Teal)
+    Secondary: #40E0D0 (Turquoise)
+    Accent: #2C3E50 (Dark Blue/Grey)
+    Background: #F0F4F8 (Light Blue Grey)
+    -->
+    <!-- 
+    Narrative Plan:
+    1. Introduction: Project Scope & Team Context
+    2. The Problem: The "One Size Fits All" Fallacy in Nutrition
+    3. Clinical Evidence: Why Protein & Creatine Matter (Longevity/Cognition)
+    4. The Solution: Technical Architecture (App, Biosensor, Urine)
+    5. Market Analysis: Competitive Landscape & Opportunity
+    6. X-Tech Roadmap: Semester Execution Plan
+    -->
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Hero Section -->
+    <header class="bg-gradient-to-r from-teal-700 to-slate-800 text-white pt-16 pb-12 px-4 shadow-lg">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div class="md:col-span-2">
+                <span class="inline-block bg-teal-500 bg-opacity-30 text-teal-100 text-xs font-bold px-2 py-1 rounded mb-4">DTU X-Tech Program</span>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Precision Bio-Monitoring</h1>
+                <p class="text-xl text-teal-50">Real-time tracking of Protein & Creatine for Longevity and Performance.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <span class="border border-teal-400 px-3 py-1 rounded-full text-sm">Biosensing</span>
+                    <span class="border border-teal-400 px-3 py-1 rounded-full text-sm">Health Tech</span>
+                    <span class="border border-teal-400 px-3 py-1 rounded-full text-sm">Personalized Nutrition</span>
+                </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-lg border border-white/20">
+                <h3 class="font-bold text-teal-200 mb-2">Project Mission</h3>
+                <p class="text-sm leading-relaxed">To develop a validated prototype for measuring physiological protein and creatine levels, bridging the gap between generic health guidelines and individual biological needs.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12">
+
+        <!-- Executive Summary & Team -->
+        <section class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 card">
+                    <div class="section-header mb-4">
+                        <h2 class="text-2xl font-bold text-slate-800">Executive Summary</h2>
+                    </div>
+                    <p class="mb-4 text-slate-600">Current health authorities provide static guidelines for protein intake (e.g., 0.8g/kg) that fail to account for the dynamic needs of aging populations, active individuals, and sex-specific variances. Furthermore, Creatine is often viewed solely as a sports supplement, despite robust clinical evidence supporting its role in cognitive preservation and sarcopenia prevention.</p>
+                    <p class="text-slate-600">This project aims to disrupt the market by creating a feedback loop: <strong>Measure &rarr; Analyze &rarr; Optimize</strong>. By combining minimally invasive biosensing with algorithmic recommendations, we can offer the first "fuel gauge" for the body's structural and energetic building blocks.</p>
+                </div>
+                <div class="card bg-slate-800 text-white">
+                    <h3 class="text-xl font-bold mb-4 text-teal-400">The X-Tech Team</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start"><span class="mr-2">🔬</span> <div><strong>Food Science / Biochem:</strong><br><span class="text-slate-400">Nutritional metabolics & Protein purification expert.</span></div></li>
+                        <li class="flex items-start"><span class="mr-2">💻</span> <div><strong>Software / Data Science:</strong><br><span class="text-slate-400">Algorithm development & HealthKit integration.</span></div></li>
+                        <li class="flex items-start"><span class="mr-2">🚀</span> <div><strong>Tech Entrepreneurship:</strong><br><span class="text-slate-400">Business modeling, market validation & IT consulting.</span></div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: The Clinical Reality -->
+        <section class="mb-16">
+            <div class="section-header mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Clinical Background: The Blind Spot</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Text Content -->
+                <div class="card h-full">
+                    <h3 class="text-lg font-bold mb-3 text-teal-700">Protein: The Longevity Lever</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        While general guidelines suggest ~0.8g/kg/day, research shows this is insufficient for optimal aging. <strong>Anabolic resistance</strong> in older adults means they require significantly more protein to trigger muscle protein synthesis (MPS). The gap between "survival" intake and "optimal" intake is where longevity is determined.
+                    </p>
+                    <h3 class="text-lg font-bold mb-3 text-teal-700 mt-6">Creatine: Beyond Muscle</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Creatine is essential for the phosphocreatine energy system (ATP recycling). Beyond muscle, the brain utilizes ~20% of the body's energy. Low creatine levels correlate with fatigue and cognitive decline. Vegetarians and the elderly often present with sub-clinical deficiencies.
+                    </p>
+                    <div class="bg-teal-50 p-4 rounded-lg border border-teal-100 mt-4">
+                        <h4 class="font-bold text-teal-800 text-sm mb-2">Key Research Insight</h4>
+                        <p class="text-xs text-teal-900 italic">"The RDA for protein (0.8 g/kg) is a minimum to avoid deficiency, not an optimum for health. Active individuals and the elderly may need 1.2–2.0 g/kg." — Phillips et al., Frontiers in Nutrition.</p>
+                    </div>
+                </div>
+
+                <!-- Visualization: Protein Needs -->
+                <div class="card h-full flex flex-col justify-center">
+                    <h3 class="text-lg font-bold mb-4 text-center">Protein Requirements vs. Reality (g/kg/day)</h3>
+                    <div class="chart-container">
+                        <canvas id="proteinChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 mt-4">Comparison of recommended daily intake across different demographics.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Technical Solution -->
+        <section class="mb-16">
+            <div class="section-header mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Proposed Solution Architecture</h2>
+            </div>
+            
+            <p class="mb-6 text-slate-600 max-w-4xl">To solve the "black box" problem of metabolism, we propose a triad ecosystem. This allows for triangulation of data: standard inputs, acute biomarkers (biosensor), and excretion analysis (urine).</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Component 1 -->
+                <div class="card border-t-4 border-teal-500 hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-4 text-center">📱</div>
+                    <h3 class="text-center font-bold text-lg mb-2">Algorithmic App</h3>
+                    <p class="text-xs text-slate-500 text-center mb-4">Apple HealthKit Integration</p>
+                    <ul class="text-sm space-y-2 text-slate-600">
+                        <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>Ingests Weight, Age, Activity</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>Calculates Metabolic Demand</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>Provides "Fuel Gauge" UI</li>
+                    </ul>
+                </div>
+
+                <!-- Component 2 -->
+                <div class="card border-t-4 border-blue-600 hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-4 text-center">📡</div>
+                    <h3 class="text-center font-bold text-lg mb-2">Subcutaneous Sensor</h3>
+                    <p class="text-xs text-slate-500 text-center mb-4">Minimally Invasive (CGM-style)</p>
+                    <ul class="text-sm space-y-2 text-slate-600">
+                        <li class="flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Interstitial Fluid Analysis</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Enzymatic Detection (Creatinase)</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Real-time trend data</li>
+                    </ul>
+                </div>
+
+                <!-- Component 3 -->
+                <div class="card border-t-4 border-indigo-600 hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-4 text-center">💧</div>
+                    <h3 class="text-center font-bold text-lg mb-2">Urine Analyzer</h3>
+                    <p class="text-xs text-slate-500 text-center mb-4">At-Home Optical/Chemical</p>
+                    <ul class="text-sm space-y-2 text-slate-600">
+                        <li class="flex items-center"><span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>Measures Nitrogen Balance</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>Validates Absorption rates</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>Non-invasive calibration point</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Competitive Landscape -->
+        <section class="mb-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-lg font-bold mb-4 text-center">Market Positioning Matrix</h3>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 mt-4">Comparing invasiveness vs. specificity of data.</p>
+                </div>
+                <div class="card flex flex-col justify-center">
+                    <h3 class="text-lg font-bold mb-3 text-teal-700">The "Blue Ocean" Opportunity</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        The current market is polarized. On one end, we have <strong>General Health Apps</strong> (MyFitnessPal) which rely on manual input and generic databases. On the other, we have <strong>Specific Medical Devices</strong> (Abbott Lingo, Dexcom) focused heavily on Glucose and Ketones.
+                    </p>
+                    <p class="text-sm text-slate-600 mb-4">
+                        <strong>The Gap:</strong> There is no consumer-grade device for <em>Anabolic Health</em> (Protein/Creatine).
+                    </p>
+                    <h4 class="font-bold text-sm text-slate-800 mt-2 mb-2">Key Competitors/Proxies:</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="p-2 bg-slate-50 rounded border border-slate-100"><strong>Abbott Lingo:</strong> Consumer biowearable for glucose/ketones. High tech barrier.</li>
+                        <li class="p-2 bg-slate-50 rounded border border-slate-100"><strong>Vivoo:</strong> Urine strip analysis via App. Good form factor, but low resolution data.</li>
+                        <li class="p-2 bg-slate-50 rounded border border-slate-100"><strong>InsideTracker:</strong> Blood panel analysis. Accurate but episodic (not real-time).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: X-Tech Roadmap -->
+        <section class="mb-16">
+            <div class="section-header mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Recommended Semester Roadmap</h2>
+            </div>
+            <div class="card">
+                <p class="text-slate-600 mb-6">Given the diverse team (Food Science, Bioinfo, Business, Software), the project should run parallel workstreams: <strong>Technical Prototyping</strong> and <strong>Commercial Validation</strong>.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <!-- Gantt Chart Visualization using simple HTML/Tailwind -->
+                    <div class="space-y-6">
+                        
+                        <!-- Phase 1 -->
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <h4 class="font-bold text-teal-800">Phase 1: Discovery & Definition (Weeks 1-4)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                <div class="bg-blue-50 p-3 rounded text-sm text-blue-900 border border-blue-100">
+                                    <strong>Tech:</strong> Research enzymatic sensors for Creatine (Creatinase/Sarcosine Oxidase). Select "proxy" metrics for MVP app.
+                                </div>
+                                <div class="bg-indigo-50 p-3 rounded text-sm text-indigo-900 border border-indigo-100">
+                                    <strong>Business:</strong> Interview athletes & elderly (Sarcopenia risk). Map "Customer Journey" for testing.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phase 2 -->
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <h4 class="font-bold text-teal-800">Phase 2: Prototyping (Weeks 5-10)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                <div class="bg-blue-50 p-3 rounded text-sm text-blue-900 border border-blue-100">
+                                    <strong>Tech:</strong> Build iOS/Web App mockup connected to HealthKit. Attempt "Lab-on-chip" simulation or wet-lab proof of enzyme reaction.
+                                </div>
+                                <div class="bg-indigo-50 p-3 rounded text-sm text-indigo-900 border border-indigo-100">
+                                    <strong>Business:</strong> Regulatory deep dive (Medical vs Consumer device pathway). Cost analysis of sensor manufacturing.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phase 3 -->
+                        <div class="timeline-item border-l-0 pb-0">
+                            <div class="timeline-dot"></div>
+                            <h4 class="font-bold text-teal-800">Phase 3: Integration & Pitch (Weeks 11-14)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                <div class="bg-blue-50 p-3 rounded text-sm text-blue-900 border border-blue-100">
+                                    <strong>Tech:</strong> Demo Algorithm (Input data -> Protein Rec). Visual concept of hardware.
+                                </div>
+                                <div class="bg-indigo-50 p-3 rounded text-sm text-indigo-900 border border-indigo-100">
+                                    <strong>Business:</strong> Final Pitch Deck. Go-to-market strategy (B2C subscription model).
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="text-center text-slate-400 text-sm pb-8">
+            <p>Generated for DTU X-Tech Project Kickoff &copy; 2024</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- UTILITY: Wrap Long Labels ---
+        function wrapLabel(str, maxChars) {
+            if (str.length <= maxChars) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + 1 + words[i].length <= maxChars) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- CHART 1: Protein Needs ---
+        const ctxProtein = document.getElementById('proteinChart').getContext('2d');
+        
+        // Data processing for wrapping
+        const proteinLabelsRaw = ['Standard Guideline (RDA)', 'Active Adult', 'Endurance Athlete', 'Strength Athlete', 'Elderly (Sarcopenia Prevention)'];
+        const proteinLabels = proteinLabelsRaw.map(l => wrapLabel(l, 16));
+
+        new Chart(ctxProtein, {
+            type: 'bar',
+            data: {
+                labels: proteinLabels,
+                datasets: [{
+                    label: 'Recommended Intake (g/kg bodyweight)',
+                    data: [0.8, 1.2, 1.4, 2.0, 1.5],
+                    backgroundColor: [
+                        '#94a3b8', // Grey for standard
+                        '#40E0D0', // Turquoise
+                        '#2dd4bf', 
+                        '#008080', // Teal
+                        '#0f766e'  // Dark Teal
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                const label = item.chart.data.labels[item.dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            },
+                            afterBody: function(tooltipItems) {
+                                return '\nNote: RDA is often insufficient for longevity contexts.';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Grams per Kg Bodyweight' }
+                    }
+                }
+            }
+        });
+
+        // --- CHART 2: Market Matrix (Scatter) ---
+        const ctxMarket = document.getElementById('marketChart').getContext('2d');
+        
+        new Chart(ctxMarket, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Competitors',
+                        data: [
+                            { x: 1, y: 2, name: 'Basic Apps (MyFitnessPal)' }, // Low Invasiveness, Low Specificity
+                            { x: 2, y: 3, name: 'Urine Strips (Vivoo)' }, // Med Invasiveness, Med Specificity
+                            { x: 8, y: 8, name: 'Medical CGM (Dexcom)' }, // High Invasiveness, High Specificity (Glucose)
+                            { x: 7, y: 7, name: 'Bio-Wearables (Abbott Lingo)' },
+                            { x: 9, y: 9, name: 'Blood Panels (InsideTracker)' }
+                        ],
+                        backgroundColor: '#94a3b8',
+                        pointRadius: 8
+                    },
+                    {
+                        label: 'Our Opportunity',
+                        data: [{ x: 5, y: 8, name: 'Proposed Solution' }], // Med Invasiveness, High Specificity
+                        backgroundColor: '#008080',
+                        pointRadius: 12,
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.name;
+                            }
+                        }
+                    },
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'Invasiveness / Friction' },
+                        min: 0, max: 10,
+                        ticks: { display: false } // Abstract scale
+                    },
+                    y: {
+                        title: { display: true, text: 'Data Specificity & Relevance' },
+                        min: 0, max: 10,
+                        ticks: { display: false } // Abstract scale
+                    }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
