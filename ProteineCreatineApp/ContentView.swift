@@ -69,23 +69,23 @@ struct ContentView: View {
                         //     .padding(.top, 5)
                         
                         NavigationLink(destination: BiomarkerView(userProfile: userProfile)) {
-                        HStack {
-                            Image(systemName: "waveform.path.ecg")
-                                .font(.title2)
-                            Text("View Biomarkers")
-                                .font(.title3)
-                                .fontWeight(.semibold)
+                            HStack {
+                                Image(systemName: "waveform.path.ecg")
+                                    .font(.title2)
+                                Text("View Biomarkers")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(15)
+                            .shadow(radius: 5)
                         }
-                        .foregroundColor(.purple)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(.white)
-                        .cornerRadius(15)
-                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                    }
-                    .padding(.top, 20)
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 30)
+                        .padding(.top, 20)
+                        .padding(.horizontal, 30)
+                        .padding(.bottom, 30)
                     }
                 }
             }
