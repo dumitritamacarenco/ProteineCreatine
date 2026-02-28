@@ -67,7 +67,6 @@ struct ContentView: View {
                         //     .multilineTextAlignment(.center)
                         //     .padding(.horizontal)
                         //     .padding(.top, 5)
-                        
                         NavigationLink(destination: BiomarkerView(userProfile: userProfile)) {
                             HStack {
                                 Image(systemName: "waveform.path.ecg")
@@ -671,14 +670,16 @@ struct BiomarkerDetailView: View {
                             
                             Text(biomarker.name)
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
                             
                             // Current Value
                             HStack(spacing: 8) {
                                 Text(String(format: "%.2f", biomarker.value))
                                     .font(.system(size: 48, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
                                 Text(biomarker.unit)
                                     .font(.title3)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.white.opacity(0.7))
                             }
                             
                             // Status Badge
@@ -713,10 +714,11 @@ struct BiomarkerDetailView: View {
                                 Text("\(String(format: "%.1f", biomarker.normalRange.lowerBound)) - \(String(format: "%.1f", biomarker.normalRange.upperBound)) \(biomarker.unit)")
                                     .font(.title2)
                                     .fontWeight(.bold)
+                                    .foregroundColor(.white)
                                 
                                 Text("Based on \(userProfile.gender.rawValue), age \(userProfile.age)")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.white.opacity(0.7))
                             }
                         }
                         
@@ -728,6 +730,7 @@ struct BiomarkerDetailView: View {
                         ) {
                             Text(biomarker.description)
                                 .font(.body)
+                                .foregroundColor(.white)
                         }
                         
                         // Function
@@ -738,6 +741,7 @@ struct BiomarkerDetailView: View {
                         ) {
                             Text(biomarker.function)
                                 .font(.body)
+                                .foregroundColor(.white)
                         }
                         
                         // High Risk
@@ -748,6 +752,7 @@ struct BiomarkerDetailView: View {
                         ) {
                             Text(biomarker.highRisk)
                                 .font(.body)
+                                .foregroundColor(.white)
                         }
                         
                         // Low Risk
@@ -758,6 +763,7 @@ struct BiomarkerDetailView: View {
                         ) {
                             Text(biomarker.lowRisk)
                                 .font(.body)
+                                .foregroundColor(.white)
                         }
                     }
                     .padding()
@@ -804,6 +810,7 @@ struct InfoCard<Content: View>: View {
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
+                    .foregroundColor(.white)
             }
             
             content
@@ -833,7 +840,7 @@ struct OverallStatusCard: View {
                 
                 Text(normalCount == biomarkers.count ? "All Systems Normal" : "Attention Needed")
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.white)
             }
             
             HStack(spacing: 20) {
@@ -863,7 +870,7 @@ struct StatusBadge: View {
                 .foregroundColor(color)
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.7))
         }
     }
 }
@@ -890,21 +897,21 @@ struct BiomarkerCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(biomarker.name)
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
                     
                     HStack(spacing: 4) {
                         Text(String(format: "%.2f", biomarker.value))
                             .font(.title3)
                             .fontWeight(.bold)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.white)
                         Text(biomarker.unit)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.7))
                     }
                     
                     Text("Normal: \(String(format: "%.1f", biomarker.normalRange.lowerBound))-\(String(format: "%.1f", biomarker.normalRange.upperBound)) \(biomarker.unit)")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.white.opacity(0.7))
                 }
                 
                 Spacer()
