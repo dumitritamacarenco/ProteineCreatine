@@ -499,7 +499,7 @@ struct BiomarkerTrendChart: View {
                 }
             }
             .frame(height: 200)
-            .padding(.bottom, 30) // extra space for X-axis labels
+            //.padding(.bottom, 30) // extra space for X-axis labels
             .chartYAxis {
                 AxisMarks(position: .leading)
             }
