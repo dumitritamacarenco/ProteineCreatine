@@ -499,6 +499,7 @@ struct BiomarkerTrendChart: View {
                 }
             }
             .frame(height: 200)
+            .padding(.bottom, 30) // extra space for X-axis labels
             .chartYAxis {
                 AxisMarks(position: .leading)
             }
@@ -702,7 +703,6 @@ struct BiomarkerDetailView: View {
                             biomarker: biomarker,
                             readings: biomarker.generateHistoricalData()
                         )
-                        .padding(.horizontal)
                         
                         // Normal Range for User
                         InfoCard(
