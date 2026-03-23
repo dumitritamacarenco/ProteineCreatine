@@ -71,7 +71,7 @@ struct ContentView: View {
                             HStack {
                                 Image(systemName: "waveform.path.ecg")
                                     .font(.title2)
-                                Text("View Biomarkers")
+                                Text("View Health Metrics")
                                     .font(.title3)
                                     .fontWeight(.semibold)
                             }
@@ -231,6 +231,9 @@ struct BiomarkerView: View {
     @State private var isRefreshing = false
     @State private var selectedBiomarker: Biomarker?
     @State private var showingDetail = false
+    @ObservedObject private var healthKitManager = HealthKitManager()
+    @State private var sleepAuthRequested = false
+    @State private var showingSleepDetail = false
     
     init(userProfile: UserProfile) {
         self.userProfile = userProfile
@@ -269,6 +272,17 @@ struct BiomarkerView: View {
                         BiomarkerComparisonChart(biomarkers: biomarkers)
                             .padding(.horizontal)
                     }
+                    
+                    // Sleep Data Card
+                    Button(action: {
+                        if healthKitManager.isAuthorized && !healthKitManager.sleepData.isEmpty {
+                            showingSleepDetail = true
+                        }
+                    }) {
+                        SleepDataCard(healthKitManager: healthKitManager, sleepAuthRequested: $sleepAuthRequested)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.horizontal)
                     
                     // Biomarker Cards
                     LazyVStack(spacing: 15) {
@@ -317,6 +331,11 @@ struct BiomarkerView: View {
                 BiomarkerDetailView(biomarker: biomarker, userProfile: userProfile)
             }
         }
+        .sheet(isPresented: $showingSleepDetail) {
+            NavigationStack {
+                SleepView()
+            }
+        }
     }
     
     var formattedDate: String {
@@ -360,52 +379,37 @@ struct BiomarkerView: View {
     func createBiomarkers(for profile: UserProfile) -> [Biomarker] {
         var biomarkers: [Biomarker] = []
         
-        // Creatinine - varies by gender
-        let creatinineRange: ClosedRange<Double> = profile.gender == .male ? 0.7...1.3 : 0.6...1.1
+        // Glucose - fasting blood sugar
+        let glucoseRange: ClosedRange<Double> = 70...100
         biomarkers.append(Biomarker(
-            name: "Creatinine",
-            value: Double.random(in: 0.5...1.4),
+            name: "Glucose",
+            value: Double.random(in: 65...110),
             unit: "mg/dL",
-            normalRange: creatinineRange,
+            normalRange: glucoseRange,
             icon: "drop.fill",
             color: .blue,
-            description: "A waste product from muscle metabolism filtered by the kidneys.",
-            function: "Indicates kidney function and muscle mass.",
-            highRisk: "May indicate kidney disease, dehydration, or excessive muscle breakdown.",
-            lowRisk: "May indicate low muscle mass or liver disease."
+            description: "Blood sugar level, the primary energy source for your body's cells.",
+            function: "Indicates blood sugar control and risk for diabetes.",
+            highRisk: "May indicate prediabetes, diabetes, or insulin resistance.",
+            lowRisk: "May indicate hypoglycemia, overmedication, or insufficient food intake."
         ))
         
-        // Creatine
-        let creatineRange: ClosedRange<Double> = 30...50
+        // Ketones - blood ketone bodies
+        let ketonesRange: ClosedRange<Double> = 0.0...0.6
         biomarkers.append(Biomarker(
-            name: "Creatine",
-            value: Double.random(in: 25...55),
-            unit: "µmol/L",
-            normalRange: creatineRange,
+            name: "Ketones",
+            value: Double.random(in: 0.0...1.2),
+            unit: "mmol/L",
+            normalRange: ketonesRange,
             icon: "bolt.fill",
             color: .yellow,
-            description: "An organic compound that helps supply energy to muscles.",
-            function: "Supports muscle energy production and athletic performance.",
-            highRisk: "Generally not harmful; often elevated in athletes.",
-            lowRisk: "May indicate inadequate dietary intake or muscle disorders."
+            description: "Molecules produced when the body burns fat for energy instead of glucose.",
+            function: "Indicates fat metabolism and ketogenic state.",
+            highRisk: "May indicate diabetic ketoacidosis, prolonged fasting, or very low carb intake.",
+            lowRisk: "Normal for glucose-based metabolism. Not concerning."
         ))
         
-        // Urea - slightly varies by age and gender
-        let ureaRange: ClosedRange<Double> = profile.age > 60 ? 8...23 : 7...20
-        biomarkers.append(Biomarker(
-            name: "Urea",
-            value: Double.random(in: 6...24),
-            unit: "mg/dL",
-            normalRange: ureaRange,
-            icon: "drop.triangle.fill",
-            color: .cyan,
-            description: "A waste product formed from protein breakdown in the liver.",
-            function: "Indicates kidney function and protein metabolism.",
-            highRisk: "May indicate kidney dysfunction, dehydration, or high protein intake.",
-            lowRisk: "May indicate liver disease or low protein intake."
-        ))
-        
-        // Cortisol - varies by age and gender
+        // Cortisol - varies by gender
         let cortisolRange: ClosedRange<Double> = profile.gender == .female ? 5...25 : 6...23
         biomarkers.append(Biomarker(
             name: "Cortisol",
@@ -418,21 +422,6 @@ struct BiomarkerView: View {
             function: "Regulates metabolism, immune response, and stress levels.",
             highRisk: "May indicate Cushing's syndrome, chronic stress, or adrenal tumors.",
             lowRisk: "May indicate Addison's disease or adrenal insufficiency."
-        ))
-        
-        // Uric Acid - significantly varies by gender
-        let uricAcidRange: ClosedRange<Double> = profile.gender == .male ? 3.7...7.0 : 2.5...6.0
-        biomarkers.append(Biomarker(
-            name: "Uric Acid",
-            value: Double.random(in: 2.0...7.5),
-            unit: "mg/dL",
-            normalRange: uricAcidRange,
-            icon: "staroflife.fill",
-            color: .pink,
-            description: "A waste product from the breakdown of purines found in many foods.",
-            function: "Acts as an antioxidant but excess can cause health issues.",
-            highRisk: "May indicate gout, kidney stones, or metabolic syndrome.",
-            lowRisk: "Generally not concerning; may indicate low purine diet."
         ))
         
         return biomarkers
@@ -559,7 +548,7 @@ struct BiomarkerComparisonChart: View {
     .cornerRadius(4)
 }
 .frame(height: 200)
-.padding(.bottom, 30) // extra space for X-axis labels
+.padding(.bottom, 50) // extra space for X-axis labels
 .chartYAxis {
     AxisMarks(position: .leading) { value in
         AxisGridLine()
@@ -573,18 +562,17 @@ struct BiomarkerComparisonChart: View {
 }
 .chartXAxis {
     AxisMarks { value in
-        AxisValueLabel {
+        AxisValueLabel(anchor: .top, collisionResolution: .disabled) {
             if let name = value.as(String.self) {
                 Text(name)
-                    .font(.caption2)
-                    .rotationEffect(.degrees(-30)) // less aggressive rotation
-                    .fixedSize() // prevent clipping
-                    .frame(maxWidth: 60, alignment: .trailing)
+                    .font(.caption)
+                    .fixedSize()
+                    .padding(.top, 8)
             }
         }
     }
 }
-.chartYScale(domain: 0...(biomarkers.map { percentageOfRange($0) }.max() ?? 150 * 1.2))
+.chartYScale(domain: 0...100)
             
             // Legend
             HStack(spacing: 15) {
@@ -944,6 +932,161 @@ struct BiomarkerCard: View {
         case .low: return "arrow.down.circle.fill"
         case .normal: return "checkmark.circle.fill"
         case .high: return "arrow.up.circle.fill"
+        }
+    }
+}
+
+// MARK: - Sleep Data Card
+struct SleepDataCard: View {
+    @ObservedObject var healthKitManager: HealthKitManager
+    @Binding var sleepAuthRequested: Bool
+    @State private var isLoading = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "moon.stars.fill")
+                    .foregroundColor(.blue)
+                Text("Sleep Analysis")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Spacer()
+                
+                if healthKitManager.isAuthorized && !healthKitManager.sleepData.isEmpty {
+                    HStack(spacing: 4) {
+                        Text("Last 7 days")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                }
+            }
+            
+            if !healthKitManager.isAuthorized {
+                // Authorization prompt
+                VStack(spacing: 12) {
+                    Text("Connect to Health app to track your sleep")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                    
+                    Button(action: {
+                        Task {
+                            do {
+                                try await healthKitManager.requestAuthorization()
+                                try await healthKitManager.fetchSleepData()
+                                sleepAuthRequested = true
+                            } catch {
+                                print("Error: \(error)")
+                            }
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "heart.text.square.fill")
+                            Text("Connect")
+                                .fontWeight(.semibold)
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .background(.blue.gradient)
+                        .cornerRadius(10)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+            } else if isLoading {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .tint(.white)
+                    Spacer()
+                }
+                .padding()
+            } else if healthKitManager.sleepData.isEmpty {
+                Text("No sleep data available. Start tracking in the Health app.")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            } else {
+                // Sleep data summary
+                let recentSleep = Array(healthKitManager.sleepData.prefix(7))
+                let avgHours = recentSleep.reduce(0.0) { $0 + $1.totalHours } / Double(recentSleep.count)
+                
+                HStack(spacing: 20) {
+                    // Average hours
+                    VStack(spacing: 4) {
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(String(format: "%.1f", avgHours))
+                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("hrs")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                        Text("Average")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    
+                    Divider()
+                        .background(.white.opacity(0.3))
+                        .frame(height: 40)
+                    
+                    // Recent nights
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(recentSleep.prefix(3)) { sleep in
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(sleepQualityColor(sleep.quality))
+                                    .frame(width: 8, height: 8)
+                                Text(sleep.date.formatted(.dateTime.month().day()))
+                                    .font(.caption2)
+                                    .foregroundColor(.white.opacity(0.8))
+                                Text(String(format: "%.1fh", sleep.totalHours))
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.vertical, 8)
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .cornerRadius(15)
+        .shadow(color: .black.opacity(0.1), radius: 5)
+        .onAppear {
+            if healthKitManager.isAuthorized && healthKitManager.sleepData.isEmpty {
+                isLoading = true
+                Task {
+                    do {
+                        try await healthKitManager.fetchSleepData()
+                        isLoading = false
+                    } catch {
+                        isLoading = false
+                    }
+                }
+            }
+        }
+    }
+    
+    func sleepQualityColor(_ quality: SleepQuality) -> Color {
+        switch quality {
+        case .good: return .green
+        case .fair: return .orange
+        case .poor: return .red
         }
     }
 }
