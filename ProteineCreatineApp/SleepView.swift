@@ -298,10 +298,15 @@ struct SleepView: View {
         let qualityCounts = Dictionary(grouping: healthKitManager.sleepData) { $0.quality }
             .mapValues { $0.count }
         
+        let totalCount = healthKitManager.sleepData.count
+        let goodPercentage = totalCount > 0 ? (Double(qualityCounts[.good] ?? 0) / Double(totalCount)) * 100 : 0
+        let fairPercentage = totalCount > 0 ? (Double(qualityCounts[.fair] ?? 0) / Double(totalCount)) * 100 : 0
+        let poorPercentage = totalCount > 0 ? (Double(qualityCounts[.poor] ?? 0) / Double(totalCount)) * 100 : 0
+        
         let chartData = [
-            QualityData(quality: "Good", count: qualityCounts[.good] ?? 0, color: .green),
-            QualityData(quality: "Fair", count: qualityCounts[.fair] ?? 0, color: .orange),
-            QualityData(quality: "Poor", count: qualityCounts[.poor] ?? 0, color: .red)
+            QualityData(quality: "Good", count: goodPercentage, color: .green),
+            QualityData(quality: "Fair", count: fairPercentage, color: .orange),
+            QualityData(quality: "Poor", count: poorPercentage, color: .red)
         ]
         
         return VStack(alignment: .leading, spacing: 12) {
@@ -317,16 +322,22 @@ struct SleepView: View {
             Chart(chartData) { data in
                 BarMark(
                     x: .value("Quality", data.quality),
-                    y: .value("Count", data.count)
+                    y: .value("Percentage", data.count)
                 )
                 .foregroundStyle(data.color.gradient)
                 .cornerRadius(8)
             }
             .frame(height: 180)
+            .chartYScale(domain: 0...100)
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
                     AxisGridLine()
-                    AxisValueLabel()
+                    AxisValueLabel {
+                        if let percentage = value.as(Double.self) {
+                            Text("\(Int(percentage))%")
+                                .font(.caption)
+                        }
+                    }
                 }
             }
             .chartXAxis {
@@ -454,7 +465,7 @@ struct SleepSessionCard: View {
 struct QualityData: Identifiable {
     let id = UUID()
     let quality: String
-    let count: Int
+    let count: Double
     let color: Color
 }
 

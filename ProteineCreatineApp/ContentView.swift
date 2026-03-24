@@ -164,32 +164,73 @@ struct Biomarker: Identifiable {
     let lowRisk: String
     
     var status: BiomarkerStatus {
-        if value < normalRange.lowerBound {
-            return .low
-        } else if value > normalRange.upperBound {
-            return .high
-        } else {
-            return .normal
+        // Each biomarker has its own logic
+        switch name {
+        case "Glucose":
+            // Low = concern, Normal = optimal, High = concern
+            if value < normalRange.lowerBound {
+                return value < normalRange.lowerBound * 0.85 ? .critical : .outOfRange
+            } else if value > normalRange.upperBound {
+                return value > normalRange.upperBound * 1.15 ? .critical : .outOfRange
+            } else {
+                return .optimal
+            }
+            
+        case "Ketones":
+            // Low = not bad (optimal for non-keto), Optimal = 0.5-3.0, High = maybe concern
+            if value <= normalRange.upperBound {
+                return .optimal  // Low ketones are fine
+            } else if value <= 3.0 {
+                return .optimal  // Nutritional ketosis range
+            } else if value <= 5.0 {
+                return .outOfRange  // High but not critical
+            } else {
+                return .critical  // Very high, potential ketoacidosis
+            }
+            
+        case "Cortisol":
+            // Low = good, Normal = good, High = concern
+            if value <= normalRange.upperBound {
+                return .optimal  // Low to normal is good
+            } else if value <= normalRange.upperBound * 1.2 {
+                return .outOfRange  // Slightly elevated
+            } else {
+                return .critical  // Very high, chronic stress
+            }
+            
+        default:
+            // Generic fallback
+            if value < normalRange.lowerBound {
+                return .outOfRange
+            } else if value > normalRange.upperBound {
+                return .outOfRange
+            } else {
+                return .optimal
+            }
         }
     }
     
     var statusColor: Color {
-        switch status {
-        case .low: return .blue
-        case .normal: return .green
-        case .high: return .orange
-        }
+        return status.color
     }
 }
 
 enum BiomarkerStatus {
-    case low, normal, high
+    case optimal, outOfRange, critical
     
     var description: String {
         switch self {
-        case .low: return "Low"
-        case .normal: return "Normal"
-        case .high: return "High"
+        case .optimal: return "Optimal"
+        case .outOfRange: return "Out of Range"
+        case .critical: return "Critical"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .optimal: return .green
+        case .outOfRange: return .orange
+        case .critical: return .red
         }
     }
 }
@@ -379,21 +420,6 @@ struct BiomarkerView: View {
     func createBiomarkers(for profile: UserProfile) -> [Biomarker] {
         var biomarkers: [Biomarker] = []
         
-        // Glucose - fasting blood sugar
-        let glucoseRange: ClosedRange<Double> = 70...100
-        biomarkers.append(Biomarker(
-            name: "Glucose",
-            value: Double.random(in: 65...110),
-            unit: "mg/dL",
-            normalRange: glucoseRange,
-            icon: "drop.fill",
-            color: .blue,
-            description: "Blood sugar level, the primary energy source for your body's cells.",
-            function: "Indicates blood sugar control and risk for diabetes.",
-            highRisk: "May indicate prediabetes, diabetes, or insulin resistance.",
-            lowRisk: "May indicate hypoglycemia, overmedication, or insufficient food intake."
-        ))
-        
         // Ketones - blood ketone bodies
         let ketonesRange: ClosedRange<Double> = 0.0...0.6
         biomarkers.append(Biomarker(
@@ -422,6 +448,21 @@ struct BiomarkerView: View {
             function: "Regulates metabolism, immune response, and stress levels.",
             highRisk: "May indicate Cushing's syndrome, chronic stress, or adrenal tumors.",
             lowRisk: "May indicate Addison's disease or adrenal insufficiency."
+        ))
+        
+        // Glucose - fasting blood sugar
+        let glucoseRange: ClosedRange<Double> = 70...100
+        biomarkers.append(Biomarker(
+            name: "Glucose",
+            value: Double.random(in: 65...110),
+            unit: "mg/dL",
+            normalRange: glucoseRange,
+            icon: "drop.fill",
+            color: .blue,
+            description: "Blood sugar level, the primary energy source for your body's cells.",
+            function: "Indicates blood sugar control and risk for diabetes.",
+            highRisk: "May indicate prediabetes, diabetes, or insulin resistance.",
+            lowRisk: "May indicate hypoglycemia, overmedication, or insufficient food intake."
         ))
         
         return biomarkers
@@ -546,9 +587,10 @@ struct BiomarkerComparisonChart: View {
     )
     .foregroundStyle(biomarker.statusColor.gradient)
     .cornerRadius(4)
+    //.annotation(position: .overlay)
 }
 .frame(height: 200)
-.padding(.bottom, 50) // extra space for X-axis labels
+//.padding(.bottom, 5) // extra space for X-axis labels
 .chartYAxis {
     AxisMarks(position: .leading) { value in
         AxisGridLine()
@@ -576,11 +618,13 @@ struct BiomarkerComparisonChart: View {
             
             // Legend
             HStack(spacing: 15) {
-                LegendItem(color: .green, label: "Normal")
-                LegendItem(color: .blue, label: "Low")
-                LegendItem(color: .orange, label: "High")
+                LegendItem(color: .green, label: "Optimal")
+                LegendItem(color: .orange, label: "Out of Range")
+                LegendItem(color: .red, label: "Critical")
             }
             .font(.caption)
+            .frame(maxWidth: .infinity)
+            .multilineTextAlignment(.center)
         }
         .padding()
         .background(.ultraThinMaterial)
@@ -589,8 +633,19 @@ struct BiomarkerComparisonChart: View {
     }
     
     private func percentageOfRange(_ biomarker: Biomarker) -> Double {
-        let midPoint = (biomarker.normalRange.lowerBound + biomarker.normalRange.upperBound) / 2
-        return (biomarker.value / midPoint) * 100
+        // Calculate percentage based on the biomarker's position within an extended range
+        // This ensures values outside normal range are still visible but capped at 100%
+        let rangeSpan = biomarker.normalRange.upperBound - biomarker.normalRange.lowerBound
+        let extendedMax = biomarker.normalRange.upperBound + (rangeSpan * 0.5) // Add 50% above normal
+        let extendedMin = biomarker.normalRange.lowerBound - (rangeSpan * 0.5) // Add 50% below normal
+        let extendedRange = extendedMax - extendedMin
+        
+        // Calculate where the value falls in this extended range
+        let normalizedValue = (biomarker.value - extendedMin) / extendedRange
+        let percentage = normalizedValue * 100
+        
+        // Cap between 0 and 100 to prevent overflow
+        return max(0, min(percentage, 100))
     }
 }
 
@@ -770,9 +825,9 @@ struct BiomarkerDetailView: View {
     
     var statusIcon: String {
         switch biomarker.status {
-        case .low: return "arrow.down.circle.fill"
-        case .normal: return "checkmark.circle.fill"
-        case .high: return "arrow.up.circle.fill"
+        case .optimal: return "checkmark.circle.fill"
+        case .outOfRange: return "exclamationmark.circle.fill"
+        case .critical: return "exclamationmark.triangle.fill"
         }
     }
 }
@@ -815,25 +870,25 @@ struct InfoCard<Content: View>: View {
 struct OverallStatusCard: View {
     let biomarkers: [Biomarker]
     
-    var normalCount: Int {
-        biomarkers.filter { $0.status == .normal }.count
+    var optimalCount: Int {
+        biomarkers.filter { $0.status == .optimal }.count
     }
     
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                Image(systemName: normalCount == biomarkers.count ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
+                Image(systemName: optimalCount == biomarkers.count ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
                     .font(.title2)
-                    .foregroundColor(normalCount == biomarkers.count ? .green : .orange)
+                    .foregroundColor(optimalCount == biomarkers.count ? .green : .orange)
                 
-                Text(normalCount == biomarkers.count ? "All Systems Normal" : "Attention Needed")
+                Text(optimalCount == biomarkers.count ? "All Systems Optimal" : "Attention Needed")
                     .font(.headline)
                     .foregroundColor(.white)
             }
             
             HStack(spacing: 20) {
-                StatusBadge(count: normalCount, total: biomarkers.count, label: "Normal", color: .green)
-                StatusBadge(count: biomarkers.count - normalCount, total: biomarkers.count, label: "Flagged", color: .orange)
+                StatusBadge(count: optimalCount, total: biomarkers.count, label: "Optimal", color: .green)
+                StatusBadge(count: biomarkers.count - optimalCount, total: biomarkers.count, label: "Flagged", color: .orange)
             }
         }
         .padding()
@@ -929,9 +984,9 @@ struct BiomarkerCard: View {
     
     func statusIcon(for status: BiomarkerStatus) -> String {
         switch status {
-        case .low: return "arrow.down.circle.fill"
-        case .normal: return "checkmark.circle.fill"
-        case .high: return "arrow.up.circle.fill"
+        case .optimal: return "checkmark.circle.fill"
+        case .outOfRange: return "exclamationmark.circle.fill"
+        case .critical: return "exclamationmark.triangle.fill"
         }
     }
 }
